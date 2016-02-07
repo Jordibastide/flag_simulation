@@ -75,9 +75,12 @@ void Flag::update(float dt)
 
 inline glm::vec3 hookForce(float K, float L, const glm::vec3& P1, const glm::vec3& P2) {
     static const float epsilon = 0.0001;
-    // TODO
+
+    glm::vec3 F = K * (1 - L / glm::max(glm::distance(P1, P2), epsilon)) * (P2 - P1);
+    return F;
 }
 
 inline glm::vec3 brakeForce(float V, float dt, const glm::vec3& v1, const glm::vec3& v2) {
-    // TODO
+    glm::vec3 F = V * ( v2 - v1) / dt;
+    return F;
 }
