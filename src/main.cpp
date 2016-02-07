@@ -15,9 +15,9 @@ using namespace Utils;
 
 int main() {
     WindowManager wm(WINDOW_WIDTH, WINDOW_HEIGHT, "Flag Simulation");
-    wm.setFramerate(60);
+    wm.setFramerate(30);
 
-    Flag flag(4096.f, 4, 3, 32, 16); // Flag creation
+    Flag flag(4096.f, 4, 3, 36, 27); // Flag creation
     glm::vec3 G(0.f, -0.001f, 0.f); // Gravity
 
     FlagRenderer3D renderer(flag.gridWidth, flag.gridHeight);
@@ -43,7 +43,7 @@ int main() {
         // Simulation
         if(dt > 0.f) {
             flag.applyExternalForce(G); // Gravity
-            flag.applyExternalForce(glm::sphericalRand(0.1f)); // Random wind force
+            //flag.applyExternalForce(glm::sphericalRand(0.1f)); // Random wind force
             flag.applyInternalForces(dt); // Internal forces
             flag.update(dt); // Update system
         }
