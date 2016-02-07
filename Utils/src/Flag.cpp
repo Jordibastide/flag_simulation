@@ -36,7 +36,6 @@ Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeigh
     // Compute distances
     L0.x = scale.x;
     L0.y = scale.y;
-    std::cout << L0.x << ", " << L0.y << std::endl;
     L1 = glm::length(L0);
     L2 = 2.f * L0;
 
@@ -45,44 +44,56 @@ Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeigh
     K1 = 1.f;
     K2 = 1.f;
 
-    V0 = 0.3f;
+    V0 = 0.125f;
     V1 = 0.1f;
-    V2 = 0.1f;
+    V2 = 0.15f;
 }
 
 void Flag::applyInternalForces(float dt)
 {
     uint k;
 
-    // Topology 0
-    for(int j = 0; j < gridHeight - 1; ++j)
+
+    for(int j = 0; j < gridHeight; ++j)
     {
-        for(int i = 0; i < gridWidth - 1; ++i)
+        for(int i = 0; i < gridWidth; ++i)
         {
             k = i + j * gridWidth;
-
-            glm::vec3 horizontalHookForce = hookForce(K0, L0.x, positionArray[k], positionArray[k + 1]);
-            glm::vec3 verticalHookForce = hookForce(K0, L0.y, positionArray[k], positionArray[k + gridWidth]);
-
-            glm::vec3 horizontalBrakeForce = brakeForce(V0, dt, velocityArray[k], velocityArray[k + 1]);
-            glm::vec3 verticalBrakeForce = brakeForce(V0, dt, velocityArray[k], velocityArray[k + gridWidth]);
-
-            if (i != 0) {
-                forceArray[k]     -= horizontalHookForce;
-                forceArray[k]     -= verticalHookForce;
-                forceArray[k]     += horizontalBrakeForce;
-                forceArray[k]     += verticalBrakeForce;
-                forceArray[k + gridWidth] += verticalHookForce;
-                forceArray[k + gridWidth] -= verticalBrakeForce;
-
+            // Topology 0
+            if (i < gridWidth - 1) {
+                glm::vec3 horizontalForces = hookForce(K0, L0.x, positionArray[k], positionArray[k + 1]) +
+                                             brakeForce(V0, dt, velocityArray[k], velocityArray[k + 1]);
+                if (i > 0)
+                    forceArray[k] += horizontalForces;
+                forceArray[k + 1] -= horizontalForces;
             }
-            forceArray[k + 1] += horizontalHookForce;
-            forceArray[k + 1] -= horizontalBrakeForce;
 
+            if (j < gridHeight - 1) {
+                glm::vec3 verticalForces = hookForce(K0, L0.y, positionArray[k], positionArray[k + gridWidth]) +
+                                           brakeForce(V0, dt, velocityArray[k], velocityArray[k + gridWidth]);
+                if (i > 0)
+                    forceArray[k] += verticalForces;
+                forceArray[k + gridWidth] -= verticalForces;
+            }
+
+            // Topology 2
+            if (i < gridWidth - 2) {
+                glm::vec3 horizontalForces = hookForce(K2, L2.x, positionArray[k], positionArray[k + 2]) +
+                                             brakeForce(V2, dt, velocityArray[k], velocityArray[k + 2]);
+                if (i > 0)
+                    forceArray[k] += horizontalForces;
+                forceArray[k + 2] -= horizontalForces;
+            }
+
+            if (j < gridHeight - 2) {
+                glm::vec3 verticalForces = hookForce(K2, L2.y, positionArray[k], positionArray[k + 2 * gridWidth]) +
+                                           brakeForce(V2, dt, velocityArray[k], velocityArray[k + 2 * gridWidth]);
+                if (i > 0)
+                    forceArray[k] += verticalForces;
+                forceArray[k + 2 * gridWidth] -= verticalForces;
+            }
         }
     }
-
-    // Topology 1
 }
 
 void Flag::applyExternalForce(const glm::vec3& F)
