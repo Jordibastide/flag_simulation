@@ -15,7 +15,8 @@ Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeigh
     {
         for(int i = 0; i < gridWidth; ++i)
         {
-            positionArray[i + j * gridWidth] = origin + glm::vec3(i, j, origin.z) * scale;
+            uint k = i + j * gridWidth;
+            positionArray[k] = origin + glm::vec3(i, j, origin.z) * scale;
         }
     }
 
@@ -37,18 +38,38 @@ Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeigh
 
 void Flag::applyInternalForces(float dt)
 {
-    // TODO
+
 }
 
 void Flag::applyExternalForce(const glm::vec3& F)
 {
-    // TODO
+    uint k;
+    for(int j = 0; j < gridHeight; ++j)
+    {
+        for(int i = 0; i < gridWidth; ++i)
+        {
+            k = i + j * gridWidth;
+            if (i != 0)
+                forceArray[k] += F;
+        }
+    }
 }
 
 void Flag::update(float dt)
 {
-    // TODO
-    // Don't forget to reset forces
+    uint k;
+    for(int j = 0; j < gridHeight; ++j)
+    {
+        for(int i = 0; i < gridWidth; ++i)
+        {
+            k = i + j * gridWidth;
+            velocityArray[k] += dt * forceArray[k]/massArray[k];
+
+            positionArray[k] += dt * velocityArray[k];
+
+            forceArray[k] = glm::vec3(0.f);
+        }
+    }
 }
 
 
