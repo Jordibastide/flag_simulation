@@ -28,7 +28,7 @@ struct Flag {
     void applyInternalForces(float dt);
 
     // Compute external forces (gravity, wind) except on fixed points
-    void applyExternalForce(const glm::vec3& F);
+    void applyExternalForce(const glm::vec3 &F);
 
     // Update speed and position with Leapfrog method
     void update(float dt);
