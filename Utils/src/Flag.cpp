@@ -37,13 +37,13 @@ Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeigh
     L2 = 2.f * L0;
 
     // Fix this parameters
-    K0 = 7.f;
-    K1 = 1.5f;
-    K2 = 0.7f;
+    K0 = 1.8f;
+    K1 = 0.21f;
+    K2 = 0.25f;
 
-    V0 = 1.f;
-    V1 = 0.05f;
-    V2 = 0.15f;
+    V0 = 1.9f;
+    V1 = 1.3f;
+    V2 = 0.1f;
 }
 
 void Flag::applyInternalForces(float dt) {

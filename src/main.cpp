@@ -17,9 +17,9 @@ int main() {
     WindowManager wm(WINDOW_WIDTH, WINDOW_HEIGHT, "Flag Simulation");
     wm.setFramerate(60);
 
-    Flag flag(4096.f, 4, 3, 36, 27); // Flag creation
+    Flag flag(4096.f, 4, 3, 32, 16); // Flag creation
     glm::vec3 G(0.f, -0.001f, 0.f); // Gravity
-    glm::vec3 W(0.04f, 0.f, 0.f); // Wind glm::sphericalRand(0.1f)
+    glm::vec3 W(0.02f, 0.f, 0.f); // Wind glm::sphericalRand(0.1f)
 
     FlagRenderer3D renderer(flag.gridWidth, flag.gridHeight);
     renderer.setProjMatrix(glm::perspective(70.f, float(WINDOW_WIDTH) / WINDOW_HEIGHT, 0.1f, 100.f));
@@ -45,7 +45,7 @@ int main() {
         if (dt > 0.f) {
             flag.applyExternalForce(G); // Gravity
             //flag.applyExternalForce(W);
-            //flag.applyExternalForce(glm::sphericalRand(0.1f)); // Random wind force
+            flag.applyExternalForce(glm::sphericalRand(0.3f)); // Random wind force
             flag.applyInternalForces(dt); // Internal forces
             flag.update(dt); // Update system
         }
