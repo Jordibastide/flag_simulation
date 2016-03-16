@@ -37,99 +37,166 @@ Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeigh
     L2 = 2.f * L0;
 
     // Fix this parameters
-    K0 = 1.8f;
-    K1 = 0.21f;
-    K2 = 0.25f;
+    K0 = 1.0;
+    K1 = 1.3;
+    K2 = 0.8;
 
-    V0 = 1.9f;
-    V1 = 1.3f;
-    V2 = 0.1f;
+    V0 = 0.08;
+    V1 = 0.005;
+    V2 = 0.06;
 }
 
 void Flag::applyInternalForces(float dt) {
-    uint k;
 
+    uint i,j,k;
+    glm::vec3 horizontalForces, verticalForces;
+    glm::vec3 rightCrossForces, leftCrossForces;
 
-    for (int j = 0; j < gridHeight; ++j) {
-        for (int i = 0; i < gridWidth; ++i) {
-            k = i + j * gridWidth;
-            // Topology 0 : Direct link
-            if (i < gridWidth - 1) {
-                glm::vec3 horizontalForces = hookForce(K0, L0.x, positionArray[k], positionArray[k + 1]) +
-                                             brakeForce(V0, dt, velocityArray[k], velocityArray[k + 1]);
-                if (i > 0)
-                    forceArray[k] += horizontalForces;
-                forceArray[k + 1] -= horizontalForces;
-            }
+    // Topology 0 : Direct Link
 
-            if (j < gridHeight - 1) {
-                glm::vec3 verticalForces = hookForce(K0, L0.y, positionArray[k], positionArray[k + gridWidth]) +
-                                           brakeForce(V0, dt, velocityArray[k], velocityArray[k + gridWidth]);
-                if (i > 0)
-                    forceArray[k] += verticalForces;
-                forceArray[k + gridWidth] -= verticalForces;
-            }
+        for(j = 0; j < gridHeight-1; ++j) {
+            for(i = 0; i < gridWidth-1; ++i) {
 
-            // Topology 1 : Cross link
-            if (j < gridHeight - 1) {
-                if (i == 0) // First Column
-                {
-                    glm::vec3 rightCrossForces = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth + 1]) +
-                                                 brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth + 1]);
+                k = i + j * gridWidth;
 
-                    forceArray[k + gridWidth + 1] -= rightCrossForces;
+                horizontalForces = hookForce(K0, L0.x, positionArray[k], positionArray[k + 1]) +
+                                   brakeForce(V0, dt, velocityArray[k], velocityArray[k + 1]);
+
+                verticalForces   = hookForce(K0, L0.y, positionArray[k], positionArray[k + gridWidth]) +
+                                   brakeForce(V0, dt, velocityArray[k], velocityArray[k + gridWidth]);
+
+                if(i>0){
+                    forceArray[k]           += horizontalForces + verticalForces;
+                    forceArray[k+gridWidth] -= verticalForces;
                 }
-                else if (i == 1) // Second Column
-                {
-                    glm::vec3 rightCrossForces = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth + 1]) +
-                                                 brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth + 1]);
-                    glm::vec3 leftCrossForces = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth - 1]) +
-                                                brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth - 1]);
 
-                    forceArray[k] -= leftCrossForces;
-                    forceArray[k] += rightCrossForces;
-                    forceArray[k + gridWidth + 1] -= rightCrossForces;
-                }
-                else if (i == gridWidth - 1) // Last Column
-                {
-                    glm::vec3 leftCrossForces = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth - 1]) +
-                                                brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth - 1]);
-
-                    forceArray[k] -= leftCrossForces;
-                    forceArray[k + gridWidth - 1] += leftCrossForces;
-                }
-                else {
-                    glm::vec3 rightCrossForces = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth + 1]) +
-                                                 brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth + 1]);
-
-                    glm::vec3 leftCrossForces = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth - 1]) +
-                                                brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth - 1]);
-
-                    forceArray[k] -= leftCrossForces;
-                    forceArray[k] += rightCrossForces;
-                    forceArray[k + gridWidth + 1] -= rightCrossForces;
-                    forceArray[k + gridWidth - 1] += leftCrossForces;
-                }
-            }
-
-            // Topology 2 : 2-step link
-            if (i < gridWidth - 2) {
-                glm::vec3 horizontalForces = hookForce(K2, L2.x, positionArray[k], positionArray[k + 2]) +
-                                             brakeForce(V2, dt, velocityArray[k], velocityArray[k + 2]);
-                if (i > 0)
-                    forceArray[k] += horizontalForces;
-                forceArray[k + 2] -= horizontalForces;
-            }
-
-            if (j < gridHeight - 2) {
-                glm::vec3 verticalForces = hookForce(K2, L2.y, positionArray[k], positionArray[k + 2 * gridWidth]) +
-                                           brakeForce(V2, dt, velocityArray[k], velocityArray[k + 2 * gridWidth]);
-                if (i > 0)
-                    forceArray[k] += verticalForces;
-                forceArray[k + 2 * gridWidth] -= verticalForces;
+                forceArray[k+1] -= horizontalForces;
             }
         }
-    }
+
+        // Last Column
+        for(j = 0; j < gridHeight-1; ++j) {
+
+            k = j + (j+1) * (gridWidth-1);
+
+            verticalForces = hookForce(K0, L0.y, positionArray[k], positionArray[k + gridWidth]) +
+                             brakeForce(V0, dt, velocityArray[k], velocityArray[k + gridWidth]);
+
+            forceArray[k]             += verticalForces;
+            forceArray[k + gridWidth] -= verticalForces;
+        }
+
+        // Last line
+        for(i = 0; i < gridWidth-1; ++i){
+
+            k = i + (gridWidth) * (gridHeight-1);
+
+            horizontalForces = hookForce(K0, L0.x, positionArray[k], positionArray[k + 1]) +
+                               brakeForce(V0, dt, velocityArray[k], velocityArray[k + 1]);
+
+            if(i>0)
+                forceArray[k] += horizontalForces;
+
+            forceArray[k+1] -= horizontalForces;
+        }
+
+    // Topology 1 : Cross link
+
+        for(j = 0; j < gridHeight-1; ++j) {
+            for(i = 0; i < gridWidth-1; ++i) {
+
+                k = i + j * gridWidth;
+
+                rightCrossForces = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth + 1]) +
+                                   brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth + 1]);
+
+                leftCrossForces  = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth - 1]) +
+                                   brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth - 1]);
+
+                if(i>0){
+                    forceArray[k] += rightCrossForces + leftCrossForces;
+                }
+
+                if(i>1){
+                    forceArray[k-1+gridWidth] -= leftCrossForces;
+                }
+
+                forceArray[k+1+gridWidth] -= rightCrossForces;
+            }
+        }
+
+        // Last column
+        for(j = 0; j < gridHeight-1; ++j) {
+
+            k = j + (j+1) * (gridWidth-1);
+
+            leftCrossForces = hookForce(K1, L1, positionArray[k], positionArray[k + gridWidth - 1]) +
+                              brakeForce(V1, dt, velocityArray[k], velocityArray[k + gridWidth - 1]);
+
+            forceArray[k]             += leftCrossForces;
+            forceArray[k-1+gridWidth] -= leftCrossForces;
+        }
+
+    // Topology 2 : 2-step link
+
+        for(j = 0; j < gridHeight-2; ++j) {
+            for(i = 0; i < gridWidth-2; ++i) {
+
+                k = i + j * gridWidth;
+
+                horizontalForces = hookForce(K2, L2.x, positionArray[k], positionArray[k + 2]) +
+                                   brakeForce(V2, dt, velocityArray[k], velocityArray[k + 2]);
+
+                verticalForces   = hookForce(K2, L2.y, positionArray[k], positionArray[k + 2 * gridWidth]) +
+                                   brakeForce(V2, dt, velocityArray[k], velocityArray[k + 2 * gridWidth]);
+
+                if(i>0){
+                    forceArray[k]             += horizontalForces + verticalForces;
+                    forceArray[k+2*gridWidth] -= verticalForces;
+                }
+
+                forceArray[k+2] -= horizontalForces;
+            }
+        }
+
+        // Last columns
+        for(j = 0; j < gridHeight-2; ++j) {
+
+            k = j + (j+1) * (gridWidth-1);
+
+            verticalForces = hookForce(K2, L2.y, positionArray[k], positionArray[k + 2 * gridWidth]) +
+                             brakeForce(V2, dt, velocityArray[k], velocityArray[k + 2 * gridWidth]);
+
+            forceArray[k]             += verticalForces;
+            forceArray[k+2*gridWidth] -= verticalForces;
+
+            verticalForces = hookForce(K2, L2.y, positionArray[k - 1], positionArray[k + 2 * gridWidth - 1]) +
+                             brakeForce(V2, dt, velocityArray[k - 1], velocityArray[k + 2 * gridWidth - 1]);
+
+            forceArray[k-1]             += verticalForces;
+            forceArray[k+2*gridWidth-1] -= verticalForces;
+        }
+
+        // Last lines
+        for(i = 0; i < gridWidth-2; ++i){
+
+            k = i + (gridWidth) * (gridHeight-1);
+
+            horizontalForces = hookForce(K2, L2.x, positionArray[k], positionArray[k + 2]) +
+                               brakeForce(V2, dt, velocityArray[k], velocityArray[k + 2]);
+
+            if(i>0){
+                forceArray[k]   += horizontalForces;
+                forceArray[k+2] -= horizontalForces;
+            }
+
+            horizontalForces = hookForce(K2, L2.x, positionArray[k - gridWidth], positionArray[k + 2 - gridWidth]) +
+                               brakeForce(V2, dt, velocityArray[k - gridWidth], velocityArray[k + 2 - gridWidth]);
+            if(i>0){
+                forceArray[k-gridWidth]   += horizontalForces;
+                forceArray[k+2-gridWidth] -= horizontalForces;
+            }
+        }
 }
 
 void Flag::applyExternalForce(const glm::vec3 &F) {
@@ -148,8 +215,10 @@ void Flag::update(float dt) {
     for (int j = 0; j < gridHeight; ++j) {
         for (int i = 0; i < gridWidth; ++i) {
             k = i + j * gridWidth;
-            velocityArray[k] += dt * forceArray[k] / massArray[k];
-            positionArray[k] += dt * velocityArray[k];
+            if (i != 0) {
+                velocityArray[k] += dt * forceArray[k] / massArray[k];
+                positionArray[k] += dt * velocityArray[k];
+            }
             forceArray[k] = glm::vec3(0.f);
         }
     }
