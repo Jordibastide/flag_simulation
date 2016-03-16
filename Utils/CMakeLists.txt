@@ -1,3 +1,3 @@
 include_directories(include)
 file(GLOB_RECURSE SRC_FILES *.cpp *.hpp)
-add_library(Utils ${SRC_FILES})
+add_library(Utils ${SRC_FILES} include/Utils/renderer/Renderer3D.h src/renderer/Renderer3D.cpp)

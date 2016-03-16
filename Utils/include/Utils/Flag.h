@@ -32,4 +32,10 @@ struct Flag {
 
     // Update speed and position with Leapfrog method
     void update(float dt);
+
+    // Compute autocollision forces
+    void autoCollisions();
+
+    // Sphere Collision
+    void sphereCollision(const glm::vec3 center,const float radius );
 };

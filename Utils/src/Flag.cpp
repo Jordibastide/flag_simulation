@@ -14,18 +14,24 @@ inline glm::vec3 brakeForce(float V, float dt, const glm::vec3 &v1, const glm::v
     return F;
 }
 
+inline glm::vec3 repulsiveForce(float dist, const glm::vec3& P1, const glm::vec3& P2){
+    glm::vec3 F = (1.f -  dist ) * glm::normalize(P1-P2) ;
+    F *= 0.05;
+    return F;
+}
+
 Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeight) :
         gridWidth(gridWidth), gridHeight(gridHeight),
         positionArray(gridWidth * gridHeight),
         velocityArray(gridWidth * gridHeight, glm::vec3(0.f)),
         massArray(gridWidth * gridHeight, mass / (gridWidth * gridHeight)),
-        forceArray(gridWidth * gridHeight, glm::vec3(0.f)) {
+        forceArray(gridWidth * gridHeight, glm::vec3(0.f)){
     glm::vec3 origin(-0.5f * width, -0.5f * height, 0.f);
     glm::vec3 scale(width / (gridWidth - 1), height / (gridHeight - 1), 1.f);
 
     for (int j = 0; j < gridHeight; ++j) {
         for (int i = 0; i < gridWidth; ++i) {
-            uint k = i + j * gridWidth;
+            int k = i + j * gridWidth;
             positionArray[k] = origin + glm::vec3(i, j, origin.z) * scale;
         }
     }
@@ -36,12 +42,11 @@ Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeigh
     L1 = glm::length(L0);
     L2 = 2.f * L0;
 
-    // Fix this parameters
     K0 = 1.0;
     K1 = 1.3;
     K2 = 0.8;
 
-    V0 = 0.08;
+    V0 = 0.2;
     V1 = 0.005;
     V2 = 0.06;
 }
@@ -206,6 +211,53 @@ void Flag::applyExternalForce(const glm::vec3 &F) {
             k = i + j * gridWidth;
             if (i != 0)
                 forceArray[k] += F;
+        }
+    }
+}
+
+void Flag::autoCollisions() {
+
+    for (int j = 0; j < gridHeight; ++j) {
+        for (int i = 0; i < gridWidth; ++i) {
+            int k = i + j * gridWidth;
+            float dist = glm::distance(positionArray[k], positionArray[k+1]);
+
+            for (int h = 0; h < gridHeight; ++h) {
+                for (int w = 0; w < gridWidth; ++w) {
+                    int q = w + h * gridWidth;
+                    if (q != k) {
+                        float epsilon = 0.1;
+
+                        if (dist < epsilon) {
+                            glm::vec3 repulse_force = repulsiveForce(dist, positionArray[k], positionArray[q]);
+                            forceArray[k] -= repulse_force;
+                            forceArray[q] += repulse_force;
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Flag::sphereCollision(const glm::vec3 center,const float radius ){
+    for(int j = 0; j < gridHeight; ++j) {
+        for(int i = 0; i < gridWidth; ++i) {
+            int k = i + j * gridWidth;
+
+            float rad = radius + 0.1;
+
+            float dist = glm::distance(positionArray[k], center);
+
+            if ( dist < radius) // si la particule rentre dans la sphere
+            {
+                float d = 1.f/sqrt(dist) - radius;
+                glm::vec3 repulse = glm::vec3(glm::normalize(glm::distance(positionArray[k], center)) * d);
+                std::cout << "RESPULSE : " << repulse << std::endl;
+                std::cout << "FORCE : " << forceArray[k] << std::endl;
+                forceArray[k] += repulse; // envoie la particule sur la surface de la sphere
+            }
         }
     }
 }
