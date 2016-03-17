@@ -42,11 +42,11 @@ Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeigh
     L1 = glm::length(L0);
     L2 = 2.f * L0;
 
-    K0 = 1.0;
+    K0 = 25.0;
     K1 = 1.3;
     K2 = 0.8;
 
-    V0 = 0.2;
+    V0 = 0.8;
     V1 = 0.005;
     V2 = 0.06;
 }
@@ -230,8 +230,8 @@ void Flag::autoCollisions() {
 
                         if (dist < epsilon) {
                             glm::vec3 repulse_force = repulsiveForce(dist, positionArray[k], positionArray[q]);
-                            forceArray[k] -= repulse_force;
-                            forceArray[q] += repulse_force;
+                            forceArray[k] += repulse_force;
+                            //forceArray[q] += repulse_force;
 
                         }
                     }
@@ -246,17 +246,17 @@ void Flag::sphereCollision(const glm::vec3 center,const float radius ){
         for(int i = 0; i < gridWidth; ++i) {
             int k = i + j * gridWidth;
 
-            float rad = radius + 0.1;
+            float rad = radius + 0.05;
 
             float dist = glm::distance(positionArray[k], center);
 
-            if ( dist < radius) // si la particule rentre dans la sphere
+            if ( dist < rad)
             {
-                float d = 1.f/sqrt(dist) - radius;
+                float d = radius/sqrt(dist) - 1.f;
                 glm::vec3 repulse = glm::vec3(glm::normalize(glm::distance(positionArray[k], center)) * d);
-                std::cout << "RESPULSE : " << repulse << std::endl;
-                std::cout << "FORCE : " << forceArray[k] << std::endl;
-                forceArray[k] += repulse; // envoie la particule sur la surface de la sphere
+//                std::cout << "RESPULSE : " << repulse << std::endl;
+//                std::cout << "FORCE : " << forceArray[k] << std::endl;
+                forceArray[k] += repulse;
             }
         }
     }
