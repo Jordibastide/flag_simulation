@@ -44,7 +44,7 @@ FlagRenderer3D::FlagRenderer3D(uint gridWidth, uint gridHeight):
     m_nGridWidth(gridWidth), m_nGridHeight(gridHeight), m_nIndexCount(0),
     m_VertexBuffer(gridWidth * gridHeight) {
 
-    // Création du VBO
+    // VBO
     glGenBuffers(1, &m_VBOID);
     glBindBuffer(GL_ARRAY_BUFFER, m_VBOID);
 
@@ -63,7 +63,7 @@ FlagRenderer3D::FlagRenderer3D(uint gridWidth, uint gridHeight):
     }
     m_nIndexCount = indexBuffer.size();
 
-    // Création du VAO
+    // VAO
     glGenVertexArrays(1, &m_VAOID);
     glBindVertexArray(m_VAOID);
 

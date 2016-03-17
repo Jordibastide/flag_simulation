@@ -35,7 +35,7 @@ public:
 private:
 	static const GLchar *VERTEX_SHADER, *FRAGMENT_SHADER;
 
-    // Ressources OpenGL
+    // OpenGL
     GLuint m_ProgramID;
     GLuint m_VBOID, m_VAOID, m_IBOID;
 

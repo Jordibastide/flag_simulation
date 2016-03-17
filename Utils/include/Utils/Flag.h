@@ -40,9 +40,6 @@ struct Flag {
     // Update speed and position with Leapfrog method
     void update(float dt);
 
-    // Compute autocollision forces
-    void autoCollisions();
-
     // Sphere Collision
-    void sphereCollision(const Sphere &sphere);
+    void sphereCollision(const Sphere &sphere, float dt);
 };

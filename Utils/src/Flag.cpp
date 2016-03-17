@@ -14,12 +14,6 @@ inline glm::vec3 brakeForce(float V, float dt, const glm::vec3 &v1, const glm::v
     return F;
 }
 
-inline glm::vec3 repulsiveForce(float dist, const glm::vec3& P1, const glm::vec3& P2){
-    glm::vec3 F = (1.f -  dist ) * glm::normalize(P1-P2) ;
-    F *= 0.05;
-    return F;
-}
-
 Flag::Flag(float mass, float width, float height, uint gridWidth, uint gridHeight) :
         gridWidth(gridWidth), gridHeight(gridHeight),
         positionArray(gridWidth * gridHeight),
@@ -215,33 +209,7 @@ void Flag::applyExternalForce(const glm::vec3 &F) {
     }
 }
 
-void Flag::autoCollisions() {
-
-    for (int j = 0; j < gridHeight; ++j) {
-        for (int i = 0; i < gridWidth; ++i) {
-            int k = i + j * gridWidth;
-            float dist = glm::distance(positionArray[k], positionArray[k+1]);
-
-            for (int h = 0; h < gridHeight; ++h) {
-                for (int w = 0; w < gridWidth; ++w) {
-                    int q = w + h * gridWidth;
-                    if (q != k) {
-                        float epsilon = 0.1;
-
-                        if (dist < epsilon) {
-                            glm::vec3 repulse_force = repulsiveForce(dist, positionArray[k], positionArray[q]);
-                            forceArray[k] += repulse_force;
-                            //forceArray[q] += repulse_force;
-
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-void Flag::sphereCollision(const Sphere &sphere){
+void Flag::sphereCollision(const Sphere &sphere, float dt){
     for(int j = 0; j < gridHeight; ++j) {
         for(int i = 0; i < gridWidth; ++i) {
             int k = i + j * gridWidth;
@@ -253,11 +221,9 @@ void Flag::sphereCollision(const Sphere &sphere){
             if ( dist < rad)
             {
                 float d = 1.f/sqrt(dist) - 1.f;
-                glm::vec3 repulse = glm::vec3(glm::normalize(glm::distance(positionArray[k], sphere.center)) * d);
-//                std::cout << "RESPULSE : " << repulse << std::endl;
-//                std::cout << "FORCE : " << forceArray[k] << std::endl;
-                //glm::vec3 brake = 0.05 * dist / dt;
-                forceArray[k] += repulse;
+                glm::vec3 repulseForce = glm::vec3(glm::normalize(positionArray[k] - sphere.center) * d);
+                glm::vec3 brakeForce = - 0.005f * glm::vec3(glm::normalize(positionArray[k] - sphere.center) / dt);
+                forceArray[k] += repulseForce + brakeForce;
             }
         }
     }
