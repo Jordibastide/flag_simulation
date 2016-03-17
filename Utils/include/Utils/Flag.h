@@ -3,6 +3,13 @@
 #include <Utils/glm.hpp>
 #include <vector>
 
+struct Sphere {
+  glm::vec3 center;
+  float radius;
+
+  Sphere(glm::vec3 center, float radius): center(center), radius(radius){};
+};
+
 struct Flag {
     unsigned int gridWidth, gridHeight; // Grid size
 
@@ -37,5 +44,5 @@ struct Flag {
     void autoCollisions();
 
     // Sphere Collision
-    void sphereCollision(const glm::vec3 center,const float radius );
+    void sphereCollision(const Sphere &sphere);
 };

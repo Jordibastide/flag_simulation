@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <iostream>
+#include <stdexcept>
 
 namespace Utils {
 

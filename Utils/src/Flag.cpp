@@ -241,21 +241,22 @@ void Flag::autoCollisions() {
     }
 }
 
-void Flag::sphereCollision(const glm::vec3 center,const float radius ){
+void Flag::sphereCollision(const Sphere &sphere){
     for(int j = 0; j < gridHeight; ++j) {
         for(int i = 0; i < gridWidth; ++i) {
             int k = i + j * gridWidth;
 
-            float rad = radius + 0.05;
+            float rad = sphere.radius + 0.05;
 
-            float dist = glm::distance(positionArray[k], center);
+            float dist = glm::distance(positionArray[k], sphere.center);
 
             if ( dist < rad)
             {
-                float d = radius/sqrt(dist) - 1.f;
-                glm::vec3 repulse = glm::vec3(glm::normalize(glm::distance(positionArray[k], center)) * d);
+                float d = 1.f/sqrt(dist) - 1.f;
+                glm::vec3 repulse = glm::vec3(glm::normalize(glm::distance(positionArray[k], sphere.center)) * d);
 //                std::cout << "RESPULSE : " << repulse << std::endl;
 //                std::cout << "FORCE : " << forceArray[k] << std::endl;
+                //glm::vec3 brake = 0.05 * dist / dt;
                 forceArray[k] += repulse;
             }
         }
